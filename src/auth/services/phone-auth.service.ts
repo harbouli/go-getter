@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Twilio } from 'twilio';
+import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
 
 @Injectable()
-export class PhoneAuthService {
+export class PhoneAuthService implements IPhoneAuthService {
   private readonly client: Twilio;
   constructor() {
     this.client = new Twilio(
