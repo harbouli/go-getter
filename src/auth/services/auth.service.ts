@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { instanceToPlain } from 'class-transformer';
 import { IUserService } from 'src/users/interfaces/User.interface';
@@ -7,13 +13,18 @@ import { Users } from 'src/utils/entities';
 import { compareHash } from 'src/utils/helper';
 
 import { IAuthService } from '../interfaces/auth.interface';
-import { CreateCredentialsParams, CredentialsParams } from '../types';
+import {
+  CreateCredentialsParams,
+  CredentialsParams,
+  JwtPayload,
+  Tokens,
+} from '../types';
 
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
     @Inject(Services.USERS_SERVICE) private readonly userService: IUserService,
-    private readonly jwtService: JwtService,
+    private jwtService: JwtService,
   ) {}
   async validateUser(userCredentialsParams: CredentialsParams): Promise<Users> {
     const user = await this.userService.findUser(
@@ -22,7 +33,7 @@ export class AuthService implements IAuthService {
     );
     if (!user)
       throw new HttpException(
-        'Password Or Username Is incorrect',
+        'Password Or Email Is incorrect',
         HttpStatus.UNAUTHORIZED,
       );
     const isPasswordValid = await compareHash(
@@ -31,40 +42,73 @@ export class AuthService implements IAuthService {
     );
     return isPasswordValid ? user : null;
   }
-  login(userCredentials: Users): { jwt: string; user: any } {
+
+  async login(userCredentials: CredentialsParams): Promise<{ jwt: string }> {
+    const isUserValid = await this.validateUser(userCredentials);
+    // console.log(isUserValid);
     const payload = {
-      email: userCredentials.email,
-      sub: userCredentials.id,
+      email: isUserValid.email,
+      sub: isUserValid.id,
     };
 
-    const jwt = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-    });
-    const user = instanceToPlain(userCredentials);
-    return { jwt, user };
+    const tokens = await this.getTokens(payload);
+    await this.userService.updateRtHash(payload.sub, tokens.refresh_token);
+    return { jwt: tokens.access_token };
   }
-  async verify(token: string): Promise<Users> {
-    const decoded = this.jwtService.verify(token, {
-      secret: process.env.JWT_SECRET,
-    });
-    const user = await this.userService.findUser({
-      email: decoded.username,
-    });
-    return user;
-  }
+
   async register(
     CreateUser: CreateCredentialsParams,
-  ): Promise<{ user: any; jwt: string }> {
+  ): Promise<{ jwt: string }> {
     const user = instanceToPlain(
       await this.userService.createUser({
         ...CreateUser,
         authType: 'emailAuth',
       }),
     );
-    const payload = { username: user.username, sub: user.id };
-    const jwt = this.jwtService.sign(payload, {
-      secret: process.env.JWT_SECRET,
-    });
-    return { jwt, user };
+    const payload = { email: user.email, sub: user.id };
+    const tokens = await this.getTokens(payload);
+    this.userService.updateRtHash(user.id, tokens.refresh_token);
+    return { jwt: tokens.access_token };
+  }
+
+  logout(id: number) {
+    this.userService.removeRT(id);
+    return HttpStatus.OK;
+  }
+
+  async refreshTokens(userId: number, rt: string): Promise<Tokens> {
+    const user = await this.userService.findUser({ id: userId });
+    if (!user || !user.rfToken) throw new ForbiddenException('Access Denied');
+
+    const rtMatches = await compareHash(user.rfToken, rt);
+    if (!rtMatches) throw new ForbiddenException('Access Denied');
+
+    const tokens = await this.getTokens({ sub: user.id, email: user.email });
+    await this.userService.updateRtHash(user.id, tokens.refresh_token);
+
+    return tokens;
+  }
+
+  async getTokens({ sub, email }: JwtPayload): Promise<Tokens> {
+    const jwtPayload = {
+      sub,
+      email,
+    };
+
+    const [at, rt] = await Promise.all([
+      this.jwtService.signAsync(jwtPayload, {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '30d',
+      }),
+      this.jwtService.signAsync(jwtPayload, {
+        secret: process.env.JWT_SECRET_REFRESH,
+        expiresIn: '45d',
+      }),
+    ]);
+
+    return {
+      access_token: at,
+      refresh_token: rt,
+    };
   }
 }

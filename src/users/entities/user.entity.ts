@@ -24,4 +24,8 @@ export class Users {
   @Column({ nullable: true })
   @Exclude()
   password?: string;
+  // Hashed RF Token
+  @Column({ nullable: true, name: 'refresh_token' })
+  @Exclude()
+  rfToken?: string;
 }

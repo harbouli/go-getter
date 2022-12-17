@@ -9,5 +9,6 @@ declare namespace NodeJS {
     ENVIRONMENT: 'PRODUCTION' | 'DEVELOPMENT';
     TWILIO_ACCOUNT_SID: string;
     TWILIO_AUTH_TOKEN: string;
+    JWT_SECRET_REFRESH: string;
   }
 }

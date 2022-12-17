@@ -5,9 +5,9 @@ import { PhoneAuthService } from './services/phone-auth.service';
 import { Services } from 'src/utils/constant';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { LocalStrategy } from './strategies/LocalStrategy';
-import { JWTStrategy } from './strategies/JWTStrategi';
+import { JWTStrategy } from './strategies/at.strategy.ts ';
 import { UsersModule } from 'src/users/users.module';
+import { RtStrategy } from './strategies/rt.strategy.ts ';
 
 @Module({
   imports: [
@@ -20,8 +20,8 @@ import { UsersModule } from 'src/users/users.module';
   ],
   controllers: [AuthController],
   providers: [
-    LocalStrategy,
     JWTStrategy,
+    RtStrategy,
     {
       provide: Services.AUTH_SERVICE,
       useClass: AuthService,

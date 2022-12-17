@@ -53,11 +53,28 @@ export class UsersService implements IUserService {
       'lastName',
       'authType',
       'phoneNumber',
+      'email',
     ];
     const selectionsWithPassword: (keyof Users)[] = [...selections, 'password'];
     return this.userRepository.findOne({
       where: { ...findUserParams },
       select: options?.selectAll ? selectionsWithPassword : selections,
     });
+  }
+  // UpdateRTHash
+  async updateRtHash(id: number, rt: string): Promise<void> {
+    const hashRt = await hashPassword(rt);
+    await this.userRepository.update(id, { rfToken: hashRt });
+  }
+
+  // Remove Hashed Token
+  removeRT(id: number): void {
+    this.userRepository
+      .createQueryBuilder()
+      .update()
+      .set({ rfToken: null })
+      .where('id = :id', { id })
+      .andWhere('hashedRt IS NOT NULL')
+      .execute();
   }
 }

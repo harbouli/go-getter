@@ -1,11 +1,14 @@
 import { Users } from 'src/utils/entities';
-import { CreateCredentialsParams, CredentialsParams } from '../types';
+import {
+  CreateCredentialsParams,
+  CredentialsParams,
+  JwtPayload,
+  Tokens,
+} from '../types';
 
 export interface IAuthService {
   validateUser(userCredentialsParams: CredentialsParams): Promise<Users | null>;
-  login(user: Users): { jwt: string; user: any };
-  verify(token: string): Promise<Users>;
-  register(
-    CreateUser: CreateCredentialsParams,
-  ): Promise<{ user: any; jwt: string }>;
+  login(user: CredentialsParams): Promise<{ jwt: string }>;
+  register(CreateUser: CreateCredentialsParams): Promise<{ jwt: string }>;
+  getTokens({ sub, email }: JwtPayload): Promise<Tokens>;
 }

@@ -11,5 +11,7 @@ export interface IUserService {
     findUserParams: FindUserParameters,
     options?: FindUserOptions,
   ): Promise<Users>;
+  updateRtHash(id: number, rt: string): Promise<void>;
+  removeRT(id: number): void;
   //   saveUser(user: User): Promise<User>;
 }
