@@ -18,6 +18,7 @@ import {
   CredentialsParams,
   JwtPayload,
   Tokens,
+  rfTokenParam,
 } from '../types';
 
 @Injectable()
@@ -47,7 +48,7 @@ export class AuthService implements IAuthService {
     const isUserValid = await this.validateUser(userCredentials);
     // console.log(isUserValid);
     const payload = {
-      email: isUserValid.email,
+      username: isUserValid.email,
       sub: isUserValid.id,
     };
 
@@ -65,7 +66,7 @@ export class AuthService implements IAuthService {
         authType: 'emailAuth',
       }),
     );
-    const payload = { email: user.email, sub: user.id };
+    const payload = { username: user.email, sub: user.id };
     const tokens = await this.getTokens(payload);
     this.userService.updateRtHash(user.id, tokens.refresh_token);
     return { jwt: tokens.access_token };
@@ -76,23 +77,23 @@ export class AuthService implements IAuthService {
     return HttpStatus.OK;
   }
 
-  async refreshTokens(userId: number, rt: string): Promise<Tokens> {
+  async refreshTokens({ userId, rt }: rfTokenParam): Promise<{ jwt: string }> {
     const user = await this.userService.findUser({ id: userId });
     if (!user || !user.rfToken) throw new ForbiddenException('Access Denied');
 
     const rtMatches = await compareHash(user.rfToken, rt);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
 
-    const tokens = await this.getTokens({ sub: user.id, email: user.email });
+    const tokens = await this.getTokens({ sub: user.id, username: user.email });
     await this.userService.updateRtHash(user.id, tokens.refresh_token);
 
-    return tokens;
+    return { jwt: tokens.access_token };
   }
 
-  async getTokens({ sub, email }: JwtPayload): Promise<Tokens> {
+  async getTokens({ sub, username }: JwtPayload): Promise<Tokens> {
     const jwtPayload = {
       sub,
-      email,
+      username,
     };
 
     const [at, rt] = await Promise.all([

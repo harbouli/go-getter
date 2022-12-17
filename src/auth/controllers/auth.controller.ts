@@ -6,18 +6,17 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { Users } from 'src/utils/entities';
 import { Routes, Services } from 'src/utils/constant';
 
 import { IAuthService } from '../interfaces/auth.interface';
-import { CredentialsParams } from '../types';
+import { CredentialsParams, Tokens } from '../types';
 import { AuthDto } from '../dto/auth.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { Request } from 'express';
-import { Public } from 'src/utils/decorators';
+
+import { GetCurrentUser, GetCurrentUserId, Public } from 'src/utils/decorators';
+import { RtGuard } from 'src/utils/guards';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -39,8 +38,17 @@ export class AuthController {
   }
   @Post('logout')
   @HttpCode(HttpStatus.OK)
-  logout(@Req() req: Request) {
-    const user = req.user;
-    console.log(user);
+  logout(@GetCurrentUserId() userId: number) {
+    return this.authService.logout(userId);
+  }
+  @Public()
+  @UseGuards(RtGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  async refreshTokens(
+    @GetCurrentUserId() userId: number,
+    @GetCurrentUser('refreshToken') rt: string,
+  ): Promise<{ jwt: string }> {
+    return await this.authService.refreshTokens({ userId, rt });
   }
 }

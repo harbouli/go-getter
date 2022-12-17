@@ -13,6 +13,10 @@ export type CreateCredentialsParams = {
 export type Tokens = { refresh_token: string; access_token: string };
 
 export type JwtPayload = {
-  email: string;
+  username: string;
   sub: number;
+};
+export type rfTokenParam = {
+  userId: number;
+  rt: string;
 };

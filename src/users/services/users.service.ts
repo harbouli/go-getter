@@ -74,7 +74,7 @@ export class UsersService implements IUserService {
       .update()
       .set({ rfToken: null })
       .where('id = :id', { id })
-      .andWhere('hashedRt IS NOT NULL')
+      .andWhere('refresh_token IS NOT NULL')
       .execute();
   }
 }
