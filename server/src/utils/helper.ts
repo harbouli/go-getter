@@ -7,4 +7,4 @@ export async function compareHash(rawPassword: string, hashedPassword: string) {
   return bcrypt.compare(rawPassword, hashedPassword);
 }
 
-export const otp = Math.floor(1000 + Math.random() * 9000);
+export const otp = () => Math.floor(1000 + Math.random() * 9000);

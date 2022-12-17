@@ -79,7 +79,6 @@ export class AuthService implements IAuthService {
     const user = await this.userService.findUser({ id: userId });
     if (!user || !user.rfToken) throw new ForbiddenException('Access Denied');
 
-    console.log(user.rfToken, rt);
     const rtMatches = await compareHash(rt, user.rfToken);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
 

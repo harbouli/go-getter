@@ -17,11 +17,16 @@ import { AuthDto } from '../dto/auth.dto';
 
 import { GetCurrentUser, GetCurrentUserId, Public } from 'src/utils/decorators';
 import { RtGuard } from 'src/utils/guards';
+import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
+import { otp } from 'src/utils/helper';
+import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController {
   constructor(
     @Inject(Services.AUTH_SERVICE) private readonly authService: IAuthService,
+    @Inject(Services.AUTH_PHONE_SERVICE)
+    private readonly phoneAuthService: IPhoneAuthService,
   ) {}
   @Public()
   @Post('signup')
@@ -50,5 +55,14 @@ export class AuthController {
     @GetCurrentUser('refreshToken') rt: string,
   ): Promise<Tokens> {
     return await this.authService.refreshTokens({ userId, rt });
+  }
+
+  @Public()
+  @Post('2fa')
+  @HttpCode(HttpStatus.OK)
+  async sendOTP(@Body() sendOTP: SendPhoneNumberDto) {
+    // use the PhoneAuthService to send the OTP
+
+    return this.phoneAuthService.sendOTP(sendOTP.phoneNumber, otp());
   }
 }
