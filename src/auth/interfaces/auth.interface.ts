@@ -9,9 +9,9 @@ import {
 
 export interface IAuthService {
   validateUser(userCredentialsParams: CredentialsParams): Promise<Users | null>;
-  login(user: CredentialsParams): Promise<{ jwt: string }>;
-  register(CreateUser: CreateCredentialsParams): Promise<{ jwt: string }>;
+  login(user: CredentialsParams): Promise<Tokens>;
+  register(CreateUser: CreateCredentialsParams): Promise<Tokens>;
   getTokens({ sub, username }: JwtPayload): Promise<Tokens>;
   logout(id: number);
-  refreshTokens(rgToken: rfTokenParam): Promise<{ jwt: string }>;
+  refreshTokens(rgToken: rfTokenParam): Promise<Tokens>;
 }

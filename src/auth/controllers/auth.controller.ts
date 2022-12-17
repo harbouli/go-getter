@@ -48,7 +48,7 @@ export class AuthController {
   async refreshTokens(
     @GetCurrentUserId() userId: number,
     @GetCurrentUser('refreshToken') rt: string,
-  ): Promise<{ jwt: string }> {
+  ): Promise<Tokens> {
     return await this.authService.refreshTokens({ userId, rt });
   }
 }

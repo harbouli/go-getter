@@ -44,7 +44,7 @@ export class AuthService implements IAuthService {
     return isPasswordValid ? user : null;
   }
 
-  async login(userCredentials: CredentialsParams): Promise<{ jwt: string }> {
+  async login(userCredentials: CredentialsParams): Promise<Tokens> {
     const isUserValid = await this.validateUser(userCredentials);
     // console.log(isUserValid);
     const payload = {
@@ -54,12 +54,10 @@ export class AuthService implements IAuthService {
 
     const tokens = await this.getTokens(payload);
     await this.userService.updateRtHash(payload.sub, tokens.refresh_token);
-    return { jwt: tokens.access_token };
+    return tokens;
   }
 
-  async register(
-    CreateUser: CreateCredentialsParams,
-  ): Promise<{ jwt: string }> {
+  async register(CreateUser: CreateCredentialsParams): Promise<Tokens> {
     const user = instanceToPlain(
       await this.userService.createUser({
         ...CreateUser,
@@ -69,25 +67,26 @@ export class AuthService implements IAuthService {
     const payload = { username: user.email, sub: user.id };
     const tokens = await this.getTokens(payload);
     this.userService.updateRtHash(user.id, tokens.refresh_token);
-    return { jwt: tokens.access_token };
+    return tokens;
   }
 
   logout(id: number) {
     this.userService.removeRT(id);
-    return HttpStatus.OK;
+    return new HttpException('Valid Token', HttpStatus.OK);
   }
 
-  async refreshTokens({ userId, rt }: rfTokenParam): Promise<{ jwt: string }> {
+  async refreshTokens({ userId, rt }: rfTokenParam): Promise<Tokens> {
     const user = await this.userService.findUser({ id: userId });
     if (!user || !user.rfToken) throw new ForbiddenException('Access Denied');
 
-    const rtMatches = await compareHash(user.rfToken, rt);
+    console.log(user.rfToken, rt);
+    const rtMatches = await compareHash(rt, user.rfToken);
     if (!rtMatches) throw new ForbiddenException('Access Denied');
 
     const tokens = await this.getTokens({ sub: user.id, username: user.email });
     await this.userService.updateRtHash(user.id, tokens.refresh_token);
 
-    return { jwt: tokens.access_token };
+    return tokens;
   }
 
   async getTokens({ sub, username }: JwtPayload): Promise<Tokens> {

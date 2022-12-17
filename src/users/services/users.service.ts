@@ -54,6 +54,7 @@ export class UsersService implements IUserService {
       'authType',
       'phoneNumber',
       'email',
+      'rfToken',
     ];
     const selectionsWithPassword: (keyof Users)[] = [...selections, 'password'];
     return this.userRepository.findOne({
