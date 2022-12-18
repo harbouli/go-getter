@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import entities from './utils/entities';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from './utils/guards/at.guard';
+import { redisModule } from './utils/moduls.config';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AtGuard } from './utils/guards/at.guard';
     ConfigModule.forRoot({ envFilePath: '.env.development' }),
     AuthModule,
     UsersModule,
+    redisModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.MYSQL_DB_HOST,

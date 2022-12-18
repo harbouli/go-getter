@@ -10,5 +10,7 @@ declare namespace NodeJS {
     TWILIO_ACCOUNT_SID: string;
     TWILIO_AUTH_TOKEN: string;
     JWT_SECRET_REFRESH: string;
+    REDIS_HOST: string;
+    REDIS_PORT: number;
   }
 }

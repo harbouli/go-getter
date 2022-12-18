@@ -2,7 +2,7 @@ export type CredentialsParams = {
   email: string;
   password: string;
 };
-export type CreateCredentialsParams = {
+export type CreateUserParams = {
   email?: string;
   phoneNumber?: string;
   password?: string;

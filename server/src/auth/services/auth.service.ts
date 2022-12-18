@@ -14,7 +14,7 @@ import { compareHash } from 'src/utils/helper';
 
 import { IAuthService } from '../interfaces/auth.interface';
 import {
-  CreateCredentialsParams,
+  CreateUserParams,
   CredentialsParams,
   JwtPayload,
   Tokens,
@@ -57,7 +57,7 @@ export class AuthService implements IAuthService {
     return tokens;
   }
 
-  async register(CreateUser: CreateCredentialsParams): Promise<Tokens> {
+  async register(CreateUser: CreateUserParams): Promise<Tokens> {
     const user = instanceToPlain(
       await this.userService.createUser({
         ...CreateUser,

@@ -20,6 +20,7 @@ import { RtGuard } from 'src/utils/guards';
 import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
 import { otp } from 'src/utils/helper';
 import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
+import { VerifyOtpDto } from '../dto/verify-otp.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -62,7 +63,26 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async sendOTP(@Body() sendOTP: SendPhoneNumberDto) {
     // use the PhoneAuthService to send the OTP
-
     return this.phoneAuthService.sendOTP(sendOTP.phoneNumber, otp());
+  }
+  @Public()
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOTP(@Body() verifyOTP: VerifyOtpDto) {
+    const { phoneNumber, otp } = verifyOTP;
+    return this.phoneAuthService.verifyOTP(phoneNumber, otp);
+  }
+  @Public()
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  async resendOTP(@Body() sendOTP: SendPhoneNumberDto) {
+    const { phoneNumber } = sendOTP;
+    return this.phoneAuthService.resendOTP(phoneNumber);
+  }
+  @Public()
+  @Post('2fa/register')
+  @HttpCode(HttpStatus.OK)
+  async phoneRegister(@Body() phoneAuth: CreateAuthDto) {
+    return this.phoneAuthService.registerWithPhone(phoneAuth as Users);
   }
 }

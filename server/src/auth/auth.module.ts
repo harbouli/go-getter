@@ -8,10 +8,12 @@ import { JwtModule } from '@nestjs/jwt';
 import { AtStrategy } from './strategies/at.strategy.ts ';
 import { UsersModule } from 'src/users/users.module';
 import { RtStrategy } from './strategies/rt.strategy.ts ';
+import { redisModule } from 'src/utils/moduls.config';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
+    redisModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '30d' },
