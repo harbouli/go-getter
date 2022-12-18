@@ -4,7 +4,7 @@ import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
 import Redis from 'ioredis';
 import { IORedisKey } from 'src/redis/redis.module';
 import { instanceToPlain } from 'class-transformer';
-import { CreateUserParams, Tokens } from '../types';
+import { PhoneAuthParam, Tokens } from '../types';
 import { Services } from 'src/utils/constant';
 import { IUserService } from 'src/users/interfaces/User.interface';
 import { IAuthService } from '../interfaces/auth.interface';
@@ -57,11 +57,16 @@ export class PhoneAuthService implements IPhoneAuthService {
   async verifyOTP(phoneNumber: string, enteredOTP: string): Promise<any> {
     //  retrieve the OTP from Redis
     const otp = await this.redis.get(phoneNumber);
-    console.log(otp);
+
     if (otp === null) {
       throw new HttpException('Invalid OTP Code.', HttpStatus.BAD_REQUEST);
     } else {
       if (otp === enteredOTP) {
+        await this.redis.setex(phoneNumber, 60 * 60, 'verify');
+        const userExist = await this.userService.findUser({ phoneNumber });
+        if (userExist) {
+          return this.authService.login({ phoneNumber });
+        }
         return { success: true, message: 'OTP is valid.' };
       } else {
         throw new HttpException('Invalid OTP Code.', HttpStatus.BAD_REQUEST);
@@ -86,7 +91,13 @@ export class PhoneAuthService implements IPhoneAuthService {
       throw new HttpException(error, 400, { cause: new Error(error) });
     }
   }
-  async registerWithPhone(createUser: CreateUserParams): Promise<Tokens> {
+  async registerWithPhone(createUser: PhoneAuthParam): Promise<Tokens> {
+    const isVerified = await this.redis.get(createUser.phoneNumber);
+    if (!isVerified)
+      throw new HttpException(
+        'Phone Number Is Not Verified',
+        HttpStatus.UNAUTHORIZED,
+      );
     const user = instanceToPlain(
       await this.userService.createUser({
         ...createUser,

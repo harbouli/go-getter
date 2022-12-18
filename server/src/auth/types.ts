@@ -1,6 +1,7 @@
 export type CredentialsParams = {
-  email: string;
-  password: string;
+  email?: string;
+  password?: string;
+  phoneNumber?: string;
 };
 export type CreateUserParams = {
   email?: string;
@@ -19,4 +20,9 @@ export type JwtPayload = {
 export type rfTokenParam = {
   userId: number;
   rt: string;
+};
+export type PhoneAuthParam = {
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
 };

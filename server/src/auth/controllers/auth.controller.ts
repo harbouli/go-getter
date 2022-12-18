@@ -21,6 +21,7 @@ import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
 import { otp } from 'src/utils/helper';
 import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
+import { PhoneAuthDto } from '../dto/phone-auth.dto';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -80,9 +81,9 @@ export class AuthController {
     return this.phoneAuthService.resendOTP(phoneNumber);
   }
   @Public()
-  @Post('2fa/register')
+  @Post('2fa/signup')
   @HttpCode(HttpStatus.OK)
-  async phoneRegister(@Body() phoneAuth: CreateAuthDto) {
-    return this.phoneAuthService.registerWithPhone(phoneAuth as Users);
+  async phoneRegister(@Body() phoneAuth: PhoneAuthDto) {
+    return this.phoneAuthService.registerWithPhone(phoneAuth);
   }
 }
