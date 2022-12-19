@@ -20,7 +20,10 @@ export class UsersService implements IUserService {
   //   Create User
   async createUser(userDetails: CreateUserParameters): Promise<Users> {
     let params: CreateUserParameters;
-    if (userDetails.authType === 'phoneAuth') {
+    if (
+      userDetails.authType === 'phoneAuth' ||
+      userDetails.authType === 'googleAuth'
+    ) {
       params = {
         ...userDetails,
         password: '',

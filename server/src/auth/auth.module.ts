@@ -10,6 +10,7 @@ import { UsersModule } from 'src/users/users.module';
 import { RtStrategy } from './strategies/rt.strategy';
 import { redisModule } from 'src/utils/moduls.config';
 import { GoogleStrategy } from './strategies/google-strategy';
+import { googleAuthService } from './services/google-auth.service';
 
 @Module({
   imports: [
@@ -33,6 +34,10 @@ import { GoogleStrategy } from './strategies/google-strategy';
     {
       provide: Services.AUTH_PHONE_SERVICE,
       useClass: PhoneAuthService,
+    },
+    {
+      provide: Services.AUTH_GOOGLE_SERVICE,
+      useClass: googleAuthService,
     },
   ],
   exports: [
