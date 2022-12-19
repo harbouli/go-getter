@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   UseGuards,
+  Get,
 } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { Users } from 'src/utils/entities';
@@ -22,6 +23,7 @@ import { otp } from 'src/utils/helper';
 import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { PhoneAuthDto } from '../dto/phone-auth.dto';
+import { GoogleAuthGuard } from 'src/utils/guards/google.guard';
 
 @Controller(Routes.AUTH)
 export class AuthController {
@@ -30,6 +32,8 @@ export class AuthController {
     @Inject(Services.AUTH_PHONE_SERVICE)
     private readonly phoneAuthService: IPhoneAuthService,
   ) {}
+
+  // Local Auth Routs
   @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
@@ -43,6 +47,8 @@ export class AuthController {
   login(@Body() credentials: AuthDto) {
     return this.authService.login(credentials as CredentialsParams);
   }
+
+  // Auth Handlers
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@GetCurrentUserId() userId: number) {
@@ -59,6 +65,7 @@ export class AuthController {
     return await this.authService.refreshTokens({ userId, rt });
   }
 
+  // 2AF Routes
   @Public()
   @Post('2fa')
   @HttpCode(HttpStatus.OK)
@@ -81,9 +88,24 @@ export class AuthController {
     return this.phoneAuthService.resendOTP(phoneNumber);
   }
   @Public()
-  @Post('2fa/signup')
+  @Post('2fa/auth')
   @HttpCode(HttpStatus.OK)
   async phoneRegister(@Body() phoneAuth: PhoneAuthDto) {
     return this.phoneAuthService.registerWithPhone(phoneAuth);
+  }
+
+  // Google Auth Routes
+
+  @Public()
+  @Get('google/login')
+  @UseGuards(GoogleAuthGuard)
+  googleLogin() {
+    return { msg: 'Google Authentication' };
+  }
+  @Public()
+  @Get('google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  handleRedirect() {
+    return { msg: 'ok' };
   }
 }

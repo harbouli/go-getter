@@ -71,8 +71,7 @@ export class AuthService implements IAuthService {
   }
 
   logout(id: number) {
-    this.userService.removeRT(id);
-    return new HttpException('Valid Token', HttpStatus.OK);
+    return this.userService.removeRT(id);
   }
 
   async refreshTokens({ userId, rt }: rfTokenParam): Promise<Tokens> {

@@ -12,5 +12,8 @@ declare namespace NodeJS {
     JWT_SECRET_REFRESH: string;
     REDIS_HOST: string;
     REDIS_PORT: number;
+    GOOGLE_CLIENT_ID: string;
+    GOOGLE_CLIENT_SECRET: string;
+    GOOGLE_REDIRECT_URL: string;
   }
 }

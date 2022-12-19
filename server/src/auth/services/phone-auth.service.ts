@@ -3,7 +3,6 @@ import { Twilio } from 'twilio';
 import { IPhoneAuthService } from '../interfaces/phone-auth.interface';
 import Redis from 'ioredis';
 import { IORedisKey } from 'src/redis/redis.module';
-import { instanceToPlain } from 'class-transformer';
 import { PhoneAuthParam, Tokens } from '../types';
 import { Services } from 'src/utils/constant';
 import { IUserService } from 'src/users/interfaces/User.interface';
@@ -66,8 +65,7 @@ export class PhoneAuthService implements IPhoneAuthService {
         const userExist = await this.userService.findUser({ phoneNumber });
         if (userExist) {
           return this.authService.login({ phoneNumber });
-        }
-        return { success: true, message: 'OTP is valid.' };
+        } else return { success: true, message: 'OTP is valid.' };
       } else {
         throw new HttpException('Invalid OTP Code.', HttpStatus.BAD_REQUEST);
       }
@@ -93,17 +91,24 @@ export class PhoneAuthService implements IPhoneAuthService {
   }
   async registerWithPhone(createUser: PhoneAuthParam): Promise<Tokens> {
     const isVerified = await this.redis.get(createUser.phoneNumber);
-    if (!isVerified)
+    if (isVerified !== 'verify')
       throw new HttpException(
         'Phone Number Is Not Verified',
         HttpStatus.UNAUTHORIZED,
       );
-    const user = instanceToPlain(
-      await this.userService.createUser({
-        ...createUser,
-        authType: 'phoneAuth',
-      }),
-    );
+    const existingUser = await this.userService.findUser({
+      phoneNumber: createUser?.phoneNumber,
+    });
+    if (existingUser)
+      throw new HttpException(
+        'Phone Number Is Already Exist',
+        HttpStatus.CONFLICT,
+      );
+    const user = await this.userService.createUser({
+      ...createUser,
+      authType: 'phoneAuth',
+    });
+
     const payload = { username: user.phoneNumber, sub: user.id };
     const tokens = await this.authService.getTokens(payload);
     this.userService.updateRtHash(user.id, tokens.refresh_token);

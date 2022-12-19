@@ -69,13 +69,22 @@ export class UsersService implements IUserService {
   }
 
   // Remove Hashed Token
-  removeRT(id: number): void {
-    this.userRepository
+  async removeRT(id: number): Promise<any> {
+    const user = await this.findUser({ id });
+    console.log(user);
+    if (!user || !user.rfToken)
+      throw new HttpException(
+        'This User does not exist or logout',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    await this.userRepository
       .createQueryBuilder()
       .update()
       .set({ rfToken: null })
       .where('id = :id', { id })
       .andWhere('refresh_token IS NOT NULL')
       .execute();
+    return HttpStatus.OK;
   }
 }
