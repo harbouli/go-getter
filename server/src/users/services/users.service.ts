@@ -74,7 +74,6 @@ export class UsersService implements IUserService {
   // Remove Hashed Token
   async removeRT(id: number): Promise<any> {
     const user = await this.findUser({ id });
-    console.log(user);
     if (!user || !user.rfToken)
       throw new HttpException(
         'This User does not exist or logout',

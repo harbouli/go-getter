@@ -7,6 +7,9 @@ import {
   HttpStatus,
   UseGuards,
   Get,
+  Req,
+  Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateAuthDto } from '../dto/create-auth.dto';
 import { Users } from 'src/utils/entities';
@@ -24,10 +27,14 @@ import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 import { PhoneAuthDto } from '../dto/phone-auth.dto';
 import { GoogleAuthGuard } from 'src/utils/guards/google.guard';
+import { Request } from 'express';
+import { IGoogleAuthService } from '../interfaces/google-auth.interface';
 
 @Controller(Routes.AUTH)
 export class AuthController {
   constructor(
+    @Inject(Services.AUTH_GOOGLE_SERVICE)
+    private readonly googleAuthService: IGoogleAuthService,
     @Inject(Services.AUTH_SERVICE) private readonly authService: IAuthService,
     @Inject(Services.AUTH_PHONE_SERVICE)
     private readonly phoneAuthService: IPhoneAuthService,
@@ -103,9 +110,20 @@ export class AuthController {
     return { msg: 'Google Authentication' };
   }
   @Public()
-  @Get('google/redirect')
+  @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  handleRedirect() {
-    return { msg: 'ok' };
+  async handleRedirect(@Req() req) {
+    // console.log();
+    console.log('return Tokens');
+    try {
+      return this.googleAuthService.validateUser({
+        lastName: req.user.name.familyName,
+        firstName: req.user.name.givenName,
+        email: req.user.emails[0].value,
+      });
+    } catch (error) {
+      Logger.log(error);
+      throw new UnauthorizedException();
+    }
   }
 }

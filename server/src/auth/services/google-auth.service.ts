@@ -13,19 +13,25 @@ export class googleAuthService implements IGoogleAuthService {
   ) {}
   async validateUser(user: CreateUserParams): Promise<Tokens> {
     const userExist = await this.usersService.findUser({ email: user.email });
-    if (userExist)
-      return this.authService.getTokens({
+    if (userExist) {
+      const tokens = await this.authService.getTokens({
         sub: userExist.id,
         username: userExist.email,
       });
+      await this.usersService.updateRtHash(userExist.id, tokens.refresh_token);
+      return tokens;
+    }
     console.log('Creating New User...');
     const newUser = await this.usersService.createUser({
       ...user,
       authType: 'googleAuth',
     });
-    return this.authService.getTokens({
+    const tokens = await this.authService.getTokens({
       sub: newUser.id,
       username: newUser.email,
     });
+    await this.usersService.updateRtHash(newUser.id, tokens.refresh_token);
+
+    return tokens;
   }
 }
