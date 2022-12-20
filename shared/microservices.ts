@@ -1,0 +1,3 @@
+export enum MICROSERVICES {
+  ADMIN_SERVICE = "ADMIN_SERVICE",
+}

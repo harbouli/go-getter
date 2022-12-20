@@ -1,29 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
+import { AdminModule } from './admin/admin.module';
 import entities from './utils/entities';
+import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { AtGuard } from './utils/guards/at.guard';
-import { redisModule } from './utils/moduls.config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
-import { MICROSERVICES } from '../../shared/microservices';
-
+import { JWTGuard } from './utils/guards/role.guard';
 @Module({
   imports: [
-    //  Config .env File
     ConfigModule.forRoot({ envFilePath: '.env.development' }),
-    ClientsModule.register([
-      {
-        name: MICROSERVICES.ADMIN_SERVICE,
-        transport: Transport.TCP,
-        options: { port: 3030 },
-      },
-    ]),
-    AuthModule,
-    UsersModule,
-    redisModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.MYSQL_DB_HOST,
@@ -34,12 +18,13 @@ import { MICROSERVICES } from '../../shared/microservices';
       synchronize: true,
       entities,
     }),
+    AdminModule,
   ],
   controllers: [],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AtGuard,
+      useClass: JWTGuard,
     },
   ],
 })

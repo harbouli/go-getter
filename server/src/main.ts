@@ -13,6 +13,6 @@ async function bootstrap() {
 
   app.enableCors({ origin: ['http://localhost:8080'], credentials: true });
 
-  await app.listen(3000, () => Logger.log('App running in port ' + PORT));
+  await app.listen(PORT, () => Logger.log('App running in port ' + PORT));
 }
 bootstrap();

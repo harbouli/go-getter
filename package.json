@@ -6,13 +6,15 @@
   "private": true,
   "workspaces": [
     "client",
-    "server"
+    "server",
+    "go-getter-admin"
   ],
   "scripts": {
     "docker:compose": "docker-compose up -d",
     "client:dev": "npm run dev --workspace=client",
     "server:dev": "wait-on tcp:6379 && npm run start:dev --workspace=server",
-    "start": "concurrently 'npm:docker:compose' 'npm:server:dev' 'npm:client:dev'",
+    "admin:server": "wait-on tcp:6379 && npm run start:dev --workspace=go-getter-admin",
+    "start": "concurrently 'npm:docker:compose' 'npm:server:dev' 'npm:client:dev' ",
     "storybook": "npm run storybook --workspace=client",
     "stop": "docker-compose down",
     "test": "echo \"Error: no test specified\" && exit 1"

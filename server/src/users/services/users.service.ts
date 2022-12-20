@@ -51,7 +51,6 @@ export class UsersService implements IUserService {
   ): Promise<Users> {
     const selections: (keyof Users)[] = [
       'id',
-      'authType',
       'firstName',
       'lastName',
       'authType',
