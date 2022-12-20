@@ -38,11 +38,13 @@ export class AdminService implements IAdminService {
     });
     Logger.log('Creating Admin ...');
     const admin = await this.adminRepository.save(newAdmin);
-    return this.getTokens({
+    const token = await this.getTokens({
       sub: admin.id,
       username: admin.email,
       role: admin.adminType,
     });
+    await this.updateTokenHash(admin.id, token.access_token);
+    return token;
   }
 
   async initApp(): Promise<boolean> {
@@ -121,6 +123,16 @@ export class AdminService implements IAdminService {
       access_token: at,
     };
   }
+  async deleteAdmin(id: number) {
+    const user = await this.findUser({ id });
+    console.log(user.adminType);
+    if (user.adminType === ROLES.SuperAdmin)
+      throw new HttpException(
+        'Update payload is empty',
+        HttpStatus.BAD_REQUEST,
+      );
+    await this.adminRepository.delete(id);
+  }
 
   async updateAdmin(id: number, update: Partial<Admin>) {
     const isSuperUser = await this.findUser({ id });
@@ -152,12 +164,17 @@ export class AdminService implements IAdminService {
     };
     return this.getTokens(payload);
   }
+  async isValidToken(payload: JwtPayload): Promise<boolean> {
+    const isToken = await this.adminRepository.findOne({
+      where: { id: payload.sub },
+      select: ['token'],
+    });
+    if (!isToken) return false;
+    return true;
+  }
+
+  async updateTokenHash(id: number, at: string): Promise<void> {
+    const hashToken = await hashPassword(at);
+    await this.adminRepository.update(id, { token: hashToken });
+  }
 }
-
-// update(id: number, updateAdminDto: UpdateAdminDto) {
-//   return `This action updates a #${id} admin`;
-// }
-
-// remove(id: number) {
-//   return `This action removes a #${id} admin`;
-// }

@@ -24,7 +24,7 @@ export class Admin {
   @Column({})
   @Exclude()
   password: string;
-  @Column()
+  @Column({ nullable: true })
   @Exclude()
   token: string;
 }

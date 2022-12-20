@@ -17,4 +17,6 @@ export interface IAdminService {
     filterQuery: FilterQuery,
   ): Promise<PageResponse>;
   updateAdmin(id: number, update: Partial<Admin>);
+  isValidToken(token: JwtPayload): Promise<boolean>;
+  deleteAdmin(id: number): Promise<any>;
 }

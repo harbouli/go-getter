@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UsePipes,
   Inject,
   HttpStatus,
   HttpException,
@@ -15,13 +14,13 @@ import {
   UseFilters,
   ParseIntPipe,
 } from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { IAdminService } from './admin.interface';
+import { CreateAdminDto } from '../dto/create-admin.dto';
+import { IAdminService } from '../admin.interface';
 import { ROLES, Routes, Services } from 'src/utils/constant';
-import { GetCurrentUser, GetCurrentUserId, Roles } from 'src/utils/decorators';
+import { GetCurrentUserId, Roles } from 'src/utils/decorators';
 import { RoleGuard } from 'src/utils/guards/role.guard';
-import { PaginationExceptionFilter } from './exceptions/pagination.exception';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { PaginationExceptionFilter } from '../exceptions/pagination.exception';
+import { UpdateAdminDto } from '../dto/update-admin.dto';
 
 @Controller(Routes.ADMIN)
 @UseGuards(RoleGuard)
@@ -70,7 +69,7 @@ export class AdminController {
       throw new HttpException('You Can Update Other User', HttpStatus.CONFLICT);
     return this.adminService.updateAdmin(+id, updateAdminDto);
   }
-  @Roles(ROLES.Auther)
+  @Roles(ROLES.SuperAdmin)
   @Patch('update/:id')
   updateAdminRole(
     @Param('id', ParseIntPipe) id: number,
@@ -80,8 +79,9 @@ export class AdminController {
     return this.adminService.updateAdmin(+id, updateAdminDto);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.adminService.remove(+id);
-  // }
+  @Roles(ROLES.SuperAdmin, ROLES.Admin)
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.deleteAdmin(id);
+  }
 }
