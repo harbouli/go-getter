@@ -3,10 +3,20 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { IAdminService } from './admin.interface';
 import { Admin } from './entities/admin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { FindUserOptions, FindeAdminParams, JwtPayload, Tokens } from './types';
+import { In, Repository } from 'typeorm';
+import {
+  FilterQuery,
+  FindUserOptions,
+  FindeAdminParams,
+  JwtPayload,
+  PageQuery,
+  PageResponse,
+  Tokens,
+} from './types';
 import { hashPassword } from 'src/utils/helper';
 import { JwtService } from '@nestjs/jwt';
+import { plainToClass } from 'class-transformer';
+import { ROLES } from 'src/utils/constant';
 
 @Injectable()
 export class AdminService implements IAdminService {
@@ -58,6 +68,40 @@ export class AdminService implements IAdminService {
       select: options?.selectAll ? selectionsWithPassword : selections,
     });
   }
+  // Find All Admins Method
+  async findAllAdmins(
+    pageParams: PageQuery,
+    filterQuery: FilterQuery,
+  ): Promise<PageResponse> {
+    const { page, perPage } = pageParams;
+    // Page
+    const skip = (page - 1) * perPage;
+    let whereClause = {};
+    // If Looking For Role
+    if (filterQuery.role.length !== 0) {
+      whereClause = { adminType: In(filterQuery.role) };
+    }
+
+    const [admins, count] = await this.adminRepository.findAndCount({
+      select: [
+        'id',
+        'firstName',
+        'lastName',
+        'phoneNumber',
+        'email',
+        'adminType',
+      ],
+      where: whereClause,
+      skip,
+      take: perPage,
+    });
+
+    return {
+      admins,
+      total: count,
+      pages: Math.ceil(count / perPage),
+    };
+  }
 
   async getTokens({ sub, username, role }: JwtPayload): Promise<Tokens> {
     const jwtPayload = {
@@ -78,23 +122,42 @@ export class AdminService implements IAdminService {
     };
   }
 
-  // create(createAdminDto: CreateAdminDto) {
-  //   return 'This action adds a new admin';
-  // }
+  async updateAdmin(id: number, update: Partial<Admin>) {
+    const isSuperUser = await this.findUser({ id });
+    switch (true) {
+      case Object.keys(update).length === 0:
+        throw new HttpException(
+          'Update payload is empty',
+          HttpStatus.BAD_REQUEST,
+        );
+      case update.password === null:
+        throw new HttpException(
+          'Cannot Updating  Password',
+          HttpStatus.BAD_REQUEST,
+        );
+      case update.adminType === ROLES.Admin &&
+        isSuperUser.adminType !== ROLES.Admin:
+        throw new HttpException(
+          'You Can Update Your Role',
+          HttpStatus.BAD_REQUEST,
+        );
+    }
 
-  // findAll() {
-  //   return `This action returns all admin`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} admin`;
-  // }
-
-  // update(id: number, updateAdminDto: UpdateAdminDto) {
-  //   return `This action updates a #${id} admin`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} admin`;
-  // }
+    await this.adminRepository.update(id, { ...update });
+    const updateAdmin = await this.adminRepository.findOne({ where: { id } });
+    const payload: JwtPayload = {
+      sub: updateAdmin.id,
+      username: updateAdmin.email,
+      role: updateAdmin.adminType,
+    };
+    return this.getTokens(payload);
+  }
 }
+
+// update(id: number, updateAdminDto: UpdateAdminDto) {
+//   return `This action updates a #${id} admin`;
+// }
+
+// remove(id: number) {
+//   return `This action removes a #${id} admin`;
+// }

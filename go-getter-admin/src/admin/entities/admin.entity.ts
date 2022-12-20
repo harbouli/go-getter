@@ -21,7 +21,10 @@ export class Admin {
   @Column({ name: 'admin_type', type: 'enum', enum: ROLES })
   adminType: ROLES;
   // Password
-  @Column({ nullable: true })
+  @Column({})
   @Exclude()
-  password?: string;
+  password: string;
+  @Column()
+  @Exclude()
+  token: string;
 }

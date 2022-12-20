@@ -1,3 +1,6 @@
+import { ROLES } from 'src/utils/constant';
+import { Admin } from './entities/admin.entity';
+
 export type FindeAdminParams = Partial<{
   email?: string;
   id?: number;
@@ -13,3 +16,8 @@ export type JwtPayload = {
   sub: number;
   role: string;
 };
+
+export type PageQuery = { page: number; perPage: number };
+
+export type PageResponse = { admins: Admin[]; total: number; pages: number };
+export type FilterQuery = { role: ROLES[] };
