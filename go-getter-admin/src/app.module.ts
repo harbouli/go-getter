@@ -4,7 +4,7 @@ import { AdminModule } from './admin/admin.module';
 import entities from './utils/entities';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { JWTGuard } from './utils/guards/role.guard';
+import { JWTGuard } from './utils/guards/jwt.guard';
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env.development' }),

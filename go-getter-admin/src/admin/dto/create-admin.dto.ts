@@ -7,7 +7,7 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Admins } from 'src/utils/constant';
+import { ROLES } from 'src/utils/constant';
 
 export class CreateAdminDto {
   @IsNotEmpty()
@@ -17,8 +17,8 @@ export class CreateAdminDto {
   @IsString()
   lastName: string;
   @IsNotEmpty()
-  @IsEnum(Admins)
-  adminType: Admins;
+  @IsEnum(ROLES)
+  adminType: ROLES;
   @IsEmail()
   email: string;
   @IsNotEmpty()

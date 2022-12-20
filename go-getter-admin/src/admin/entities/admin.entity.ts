@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { Admins } from 'src/utils/constant';
+import { ROLES } from 'src/utils/constant';
 @Entity('admins')
 export class Admin {
   @PrimaryGeneratedColumn()
@@ -18,8 +18,8 @@ export class Admin {
   @Column()
   email: string;
   // AuthType
-  @Column({ name: 'admin_type', type: 'enum', enum: Admins })
-  adminType: Admins;
+  @Column({ name: 'admin_type', type: 'enum', enum: ROLES })
+  adminType: ROLES;
   // Password
   @Column({ nullable: true })
   @Exclude()

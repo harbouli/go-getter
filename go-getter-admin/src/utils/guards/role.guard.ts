@@ -1,26 +1,23 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthGuard } from '@nestjs/passport';
+import { JWTGuard } from './jwt.guard';
 
 @Injectable()
-export class JWTGuard extends AuthGuard('jwt') {
-  constructor(private reflector: Reflector) {
-    super();
-  }
+export class RoleGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride('isPublic', [
       context.getHandler(),
       context.getClass(),
     ]);
-    const isRole = this.reflector.getAllAndOverride('roles', [
-      context.getClass(),
-      context.getHandler(),
-      context.getArgs,
-    ]);
-    if (isPublic) return true;
-    console.log(isRole);
 
-    return super.canActivate(context);
+    const roles = this.reflector.get<string[]>('roles', context.getHandler());
+    if (!roles) {
+      return true;
+    }
+    const request = context.switchToHttp().getRequest();
+    const user = await new JWTGuard().canActivate(context);
+    return (user && roles.includes(request.user.role)) || isPublic;
   }
 }

@@ -11,4 +11,5 @@ export type Tokens = { access_token: string };
 export type JwtPayload = {
   username: string;
   sub: number;
+  role: string;
 };

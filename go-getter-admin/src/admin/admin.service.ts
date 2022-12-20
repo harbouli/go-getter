@@ -28,7 +28,11 @@ export class AdminService implements IAdminService {
     });
     Logger.log('Creating Admin ...');
     const admin = await this.adminRepository.save(newAdmin);
-    return this.getTokens({ sub: admin.id, username: admin.email });
+    return this.getTokens({
+      sub: admin.id,
+      username: admin.email,
+      role: admin.adminType,
+    });
   }
 
   async initApp(): Promise<boolean> {
@@ -55,10 +59,11 @@ export class AdminService implements IAdminService {
     });
   }
 
-  async getTokens({ sub, username }: JwtPayload): Promise<Tokens> {
+  async getTokens({ sub, username, role }: JwtPayload): Promise<Tokens> {
     const jwtPayload = {
       sub,
       username,
+      role,
     };
 
     const [at] = await Promise.all([
