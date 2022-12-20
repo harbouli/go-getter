@@ -5,6 +5,7 @@ export enum ROLES {
 }
 export enum Routes {
   ADMIN = 'admin',
+  AUTH = 'auth',
 }
 export enum Services {
   ADMIN_SERVICE = 'ADMIN_SERVICE',

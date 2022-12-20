@@ -6,6 +6,7 @@ import { Admin } from './entities/admin.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JWRStrategy } from 'src/utils/strategies/jwt.strategy';
+import { AuthAdminController } from './controllers/auth-admin.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { JWRStrategy } from 'src/utils/strategies/jwt.strategy';
       secret: process.env.JWT_SECRET,
     }),
   ],
-  controllers: [AdminController],
+  controllers: [AdminController, AuthAdminController],
   providers: [
     { provide: Services.ADMIN_SERVICE, useClass: AdminService },
     JWRStrategy,

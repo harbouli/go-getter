@@ -5,6 +5,7 @@ import { Admin } from './entities/admin.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import {
+  AdminLoginParam,
   FilterQuery,
   FindUserOptions,
   FindeAdminParams,
@@ -13,7 +14,7 @@ import {
   PageResponse,
   Tokens,
 } from './types';
-import { hashPassword } from 'src/utils/helper';
+import { compareHash, hashPassword } from 'src/utils/helper';
 import { JwtService } from '@nestjs/jwt';
 import { plainToClass } from 'class-transformer';
 import { ROLES } from 'src/utils/constant';
@@ -46,6 +47,33 @@ export class AdminService implements IAdminService {
     await this.updateTokenHash(admin.id, token.access_token);
     return token;
   }
+  async loginAdmin(adminLoginParam: AdminLoginParam): Promise<Tokens> {
+    const user = await this.findUser(
+      { email: adminLoginParam.email },
+      { selectAll: true },
+    );
+    if (!user)
+      throw new HttpException(
+        'Password Or Email Is incorrect',
+        HttpStatus.UNAUTHORIZED,
+      );
+    const isPasswordValid = await compareHash(
+      adminLoginParam.password,
+      user.password,
+    );
+    if (!isPasswordValid)
+      throw new HttpException(
+        'Password Or Email Is incorrect',
+        HttpStatus.UNAUTHORIZED,
+      );
+    const token = await this.getTokens({
+      sub: user.id,
+      username: user.email,
+      role: user.adminType,
+    });
+    await this.updateTokenHash(user.id, token.access_token);
+    return token;
+  }
 
   async initApp(): Promise<boolean> {
     const count = await this.adminRepository.count();
@@ -63,6 +91,7 @@ export class AdminService implements IAdminService {
       'lastName',
       'phoneNumber',
       'email',
+      'adminType',
     ];
     const selectionsWithPassword: (keyof Admin)[] = [...selections, 'password'];
     return this.adminRepository.findOne({
@@ -125,10 +154,10 @@ export class AdminService implements IAdminService {
   }
   async deleteAdmin(id: number) {
     const user = await this.findUser({ id });
-    console.log(user.adminType);
-    if (user.adminType === ROLES.SuperAdmin)
+    if (!user) throw new HttpException(' User Not Found', HttpStatus.NOT_FOUND);
+    if (user?.adminType === ROLES.SuperAdmin)
       throw new HttpException(
-        'Update payload is empty',
+        ' You Can Not Delete Super Admin',
         HttpStatus.BAD_REQUEST,
       );
     await this.adminRepository.delete(id);
@@ -136,6 +165,9 @@ export class AdminService implements IAdminService {
 
   async updateAdmin(id: number, update: Partial<Admin>) {
     const isSuperUser = await this.findUser({ id });
+    if (!isSuperUser)
+      throw new HttpException(' User Not Found', HttpStatus.NOT_FOUND);
+
     switch (true) {
       case Object.keys(update).length === 0:
         throw new HttpException(

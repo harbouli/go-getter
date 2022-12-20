@@ -41,7 +41,11 @@ export class AdminController {
         HttpStatus.UNAUTHORIZED,
       );
     }
-    return this.adminService.createAdmin(createAdminDto);
+    try {
+      return this.adminService.createAdmin(createAdminDto);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   // Get All Admins
@@ -56,7 +60,11 @@ export class AdminController {
   ) {
     const paginationQuery = { page, perPage };
     const filterQuery = { role };
-    return this.adminService.findAllAdmins(paginationQuery, filterQuery);
+    try {
+      return this.adminService.findAllAdmins(paginationQuery, filterQuery);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Patch(':id')
@@ -75,13 +83,20 @@ export class AdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAdminDto: UpdateAdminDto,
   ) {
-    console.log(id);
-    return this.adminService.updateAdmin(+id, updateAdminDto);
+    try {
+      return this.adminService.updateAdmin(+id, updateAdminDto);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Roles(ROLES.SuperAdmin, ROLES.Admin)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.adminService.deleteAdmin(id);
+    try {
+      return this.adminService.deleteAdmin(id);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

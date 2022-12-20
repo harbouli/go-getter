@@ -7,17 +7,12 @@ export class RoleGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride('isPublic', [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!roles) {
       return true;
     }
     const request = context.switchToHttp().getRequest();
     const user = await new JWTGuard().canActivate(context);
-    return (user && roles.includes(request.user.role)) || isPublic;
+    return user && roles.includes(request.user.role);
   }
 }
