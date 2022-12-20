@@ -7,7 +7,7 @@ import { IAdminService } from 'src/admin/admin.interface';
 import { UnauthorizedException } from '@nestjs/common/exceptions';
 
 @Injectable()
-export class JWRStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JWTStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @Inject(Services.ADMIN_SERVICE)
     private readonly adminService: IAdminService,
@@ -19,10 +19,7 @@ export class JWRStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: JwtPayload) {
-    const isToken = await this.adminService.isValidToken(payload);
-    if (!isToken) {
-      return payload;
-    }
-    return new UnauthorizedException('Unvalid Token');
+    console.log(payload);
+    return payload;
   }
 }

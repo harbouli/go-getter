@@ -6,7 +6,6 @@ import {
 import { JwtPayload } from 'src/admin/types';
 
 export const Roles = (...roles: string[]) => SetMetadata('roles', roles);
-export const Public = () => SetMetadata('isPublic', true);
 export const GetCurrentUserId = createParamDecorator(
   (_: undefined, context: ExecutionContext): number => {
     const request = context.switchToHttp().getRequest();

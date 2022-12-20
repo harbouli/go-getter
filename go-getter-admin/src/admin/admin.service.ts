@@ -14,9 +14,9 @@ import {
   PageResponse,
   Tokens,
 } from './types';
+import * as argon from 'argon2';
 import { compareHash, hashPassword } from 'src/utils/helper';
 import { JwtService } from '@nestjs/jwt';
-import { plainToClass } from 'class-transformer';
 import { ROLES } from 'src/utils/constant';
 
 @Injectable()
@@ -92,6 +92,7 @@ export class AdminService implements IAdminService {
       'phoneNumber',
       'email',
       'adminType',
+      'token',
     ];
     const selectionsWithPassword: (keyof Admin)[] = [...selections, 'password'];
     return this.adminRepository.findOne({
@@ -206,7 +207,7 @@ export class AdminService implements IAdminService {
   }
 
   async updateTokenHash(id: number, at: string): Promise<void> {
-    const hashToken = await hashPassword(at);
+    const hashToken = await argon.hash(at);
     await this.adminRepository.update(id, { token: hashToken });
   }
 }

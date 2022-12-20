@@ -2,6 +2,8 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { Admin } from './entities/admin.entity';
 import {
   FilterQuery,
+  FindUserOptions,
+  FindeAdminParams,
   JwtPayload,
   PageQuery,
   PageResponse,
@@ -10,6 +12,10 @@ import {
 
 export interface IAdminService {
   createAdmin(createAdminParam: CreateAdminDto): Promise<Tokens>;
+  findUser(
+    findUserParams: FindeAdminParams,
+    options?: FindUserOptions,
+  ): Promise<Admin>;
   initApp(): Promise<boolean>;
   getTokens({ sub, username }: JwtPayload): Promise<Tokens>;
   findAllAdmins(

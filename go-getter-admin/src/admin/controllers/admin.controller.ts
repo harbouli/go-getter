@@ -21,8 +21,10 @@ import { GetCurrentUserId, Roles } from 'src/utils/decorators';
 import { RoleGuard } from 'src/utils/guards/role.guard';
 import { PaginationExceptionFilter } from '../exceptions/pagination.exception';
 import { UpdateAdminDto } from '../dto/update-admin.dto';
+import { JWTGuard } from 'src/utils/guards/jwt.guard';
 
 @Controller(Routes.ADMIN)
+@UseGuards(JWTGuard)
 @UseGuards(RoleGuard)
 export class AdminController {
   constructor(
@@ -50,8 +52,8 @@ export class AdminController {
 
   // Get All Admins
 
-  @Roles(ROLES.SuperAdmin, ROLES.Admin)
   @UseFilters(new PaginationExceptionFilter())
+  @Roles(ROLES.SuperAdmin, ROLES.Admin)
   @Get()
   async findAll(
     @Query('page', ParseIntPipe) page: number,
@@ -60,6 +62,7 @@ export class AdminController {
   ) {
     const paginationQuery = { page, perPage };
     const filterQuery = { role };
+    console.log(page);
     try {
       return this.adminService.findAllAdmins(paginationQuery, filterQuery);
     } catch (error) {
@@ -68,7 +71,7 @@ export class AdminController {
   }
 
   @Patch(':id')
-  updateRole(
+  updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAdminDto: UpdateAdminDto,
     @GetCurrentUserId() userId: number,

@@ -1,4 +1,10 @@
-import { IsEnum, IsOptional, IsString, IsEmail } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsEmail,
+  IsPhoneNumber,
+} from 'class-validator';
 import { ROLES } from 'src/utils/constant';
 
 export class UpdateAdminDto {
@@ -14,4 +20,7 @@ export class UpdateAdminDto {
   @IsOptional()
   @IsEnum({ Admin: 'ADMIN', Auther: 'AUTHER' })
   adminType: ROLES;
+  @IsOptional()
+  @IsPhoneNumber()
+  phoneNumber: string;
 }
