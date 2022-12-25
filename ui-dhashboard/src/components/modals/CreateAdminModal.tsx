@@ -121,7 +121,6 @@ const CreateAdminModal = ({ isOpen, onOpen, onClose }: Props) => {
                 }}
                 validationSchema={validation}
                 onSubmit={async (val) => {
-                  console.log(val);
                   const params = {
                     adminType: val.adminType,
                     email: val.email,
@@ -138,7 +137,6 @@ const CreateAdminModal = ({ isOpen, onOpen, onClose }: Props) => {
                   // const res = await createAdmin(params);
 
                   if (res.type === "admins/create/fulfilled") {
-                    console.log(res);
                     onClose();
 
                     toast({

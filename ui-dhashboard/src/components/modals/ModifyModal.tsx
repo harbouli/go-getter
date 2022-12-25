@@ -95,7 +95,6 @@ const ModifyModal = ({ id, isOpen, onOpen, onClose }: Props) => {
 
           setUser(res.data);
           setLoading(false);
-          console.log(res);
         } catch (error) {
           setLoading(true);
         }
@@ -130,7 +129,6 @@ const ModifyModal = ({ id, isOpen, onOpen, onClose }: Props) => {
               }}
               validationSchema={validation}
               onSubmit={async (val) => {
-                console.log(val);
                 const params = {
                   ...(val.adminType !== "" && {
                     adminType: val.adminType,

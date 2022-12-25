@@ -8,38 +8,45 @@ import { SidebarContext } from "contexts/SidebarContext";
 import { useState } from "react";
 import { Redirect, Route, Switch } from "react-router-dom";
 import routes from "routes";
+import { ROLES } from "utils/constant";
 
 // Custom Chakra theme
 export default function Dashboard(props: {
   [x: string]: any;
   authenticated: boolean;
+  role: ROLES;
 }) {
-  const { ...rest } = props;
+  const { role, ...rest } = props;
   // states and functions
   const [fixed] = useState(false);
   const [toggleSidebar, setToggleSidebar] = useState(false);
+
+  // Filter Routs Depanding On The Roles
+  const filteredRoutes = routes.filter((route) => route.roles.includes(role));
   // functions for changing the states from components
   const getRoute = () => {
     return window.location.pathname !== "/admin/full-screen-maps";
   };
-  const getActiveRoute = (routes: RoutesType[]): string => {
-    let activeRoute = "Default Brand Text";
-    for (let i = 0; i < routes.length; i++) {
+  const getActiveRoute = (filteredRoutes: RoutesType[]): string => {
+    let activeRoute = "Go Getter";
+    for (let i = 0; i < filteredRoutes.length; i++) {
       if (
-        window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
+        window.location.href.indexOf(
+          filteredRoutes[i].layout + filteredRoutes[i].path
+        ) !== -1
       ) {
-        return routes[i].name;
+        return filteredRoutes[i].name;
       }
     }
     return activeRoute;
   };
-  const getActiveNavbar = (routes: RoutesType[]): boolean => {
+  const getActiveNavbar = (filteredRoutes: RoutesType[]): boolean => {
     let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
       if (
         window.location.href.indexOf(routes[i].layout + routes[i].path) !== -1
       ) {
-        return routes[i].secondary;
+        return filteredRoutes[i].secondary;
       }
     }
     return activeNavbar;
@@ -79,7 +86,7 @@ export default function Dashboard(props: {
           setToggleSidebar,
         }}
       >
-        <Sidebar routes={routes} display="none" {...rest} />
+        <Sidebar routes={filteredRoutes} display="none" {...rest} />
         <Box
           float="right"
           minHeight="100vh"
@@ -99,9 +106,9 @@ export default function Dashboard(props: {
               <Navbar
                 onOpen={onOpen}
                 logoText={"Go Getter Admin Dashboard"}
-                brandText={getActiveRoute(routes)}
-                secondary={getActiveNavbar(routes)}
-                message={getActiveNavbarText(routes)}
+                brandText={getActiveRoute(filteredRoutes)}
+                secondary={getActiveNavbar(filteredRoutes)}
+                message={getActiveNavbarText(filteredRoutes)}
                 fixed={fixed}
                 {...rest}
               />
@@ -117,7 +124,7 @@ export default function Dashboard(props: {
               pt="50px"
             >
               <Switch>
-                {getRoutes(routes)}
+                {getRoutes(filteredRoutes)}
                 <Redirect from="/" to="/admin/dashboard" />
               </Switch>
             </Box>

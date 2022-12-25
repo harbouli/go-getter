@@ -1,5 +1,5 @@
 import { Icon } from "@chakra-ui/react";
-import { MdHome, MdLock } from "react-icons/md";
+import { MdHome } from "react-icons/md";
 
 // Admin Imports
 import MainDashboard from "views/admin/default";
@@ -8,6 +8,7 @@ import Moderators from "views/admin/dataTables";
 
 // Auth Imports
 import { RiAdminFill } from "react-icons/ri";
+import { ROLES } from "utils/constant";
 
 const routes = [
   {
@@ -16,6 +17,7 @@ const routes = [
     path: "/dashboard",
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: MainDashboard,
+    roles: [ROLES.Admin, ROLES.Auther, ROLES.SuperAdmin],
   },
 
   {
@@ -24,6 +26,7 @@ const routes = [
     icon: <Icon as={RiAdminFill} width="20px" height="20px" color="inherit" />,
     path: "/moderators",
     component: Moderators,
+    roles: [ROLES.Admin, ROLES.SuperAdmin],
   },
 ];
 

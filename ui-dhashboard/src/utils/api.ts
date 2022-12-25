@@ -91,7 +91,6 @@ export const signIn = async (payload: UserCredentials) => {
 
 // Verify Token
 export const verifyToken = async (token: string) => {
-  console.log(token);
   const response = await axios.get<VerifyTokenResponse>(
     `${REACT_APP_API_HOSTNAME_ADMIN}/auth/verifyToken`,
     { headers: { Authorization: `Bearer ${token}` } }

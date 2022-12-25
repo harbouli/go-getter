@@ -58,13 +58,7 @@ function InputFieldEditable({
       <Flex justifyContent={"space-between"}>
         <EditablePreview />
         {/* Here is the custom input */}
-        <Input
-          variant="main"
-          {...rest}
-          // onChange={() => console.log("object")}
-          as={EditableInput}
-          mr={2}
-        />
+        <Input variant="main" {...rest} as={EditableInput} mr={2} />
         <EditableControls />
       </Flex>
     </Editable>

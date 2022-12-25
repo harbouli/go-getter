@@ -103,10 +103,8 @@ function SignIn(props: { authenticated: boolean }) {
                 password: "",
               }}
               onSubmit={async (val) => {
-                console.log(val);
                 try {
                   const res = await signIn(val);
-                  console.log(res);
                   const token = res.data.access_token;
                   setAcccesToken(token);
                   axios.defaults.headers.common[
@@ -116,7 +114,6 @@ function SignIn(props: { authenticated: boolean }) {
                   dispatch(setUser(user.data));
                   history.push("/admin");
                 } catch (errors: any) {
-                  console.log(errors);
                   const error = errors.response.data.message;
                   toast({
                     title: "Error occurred.",

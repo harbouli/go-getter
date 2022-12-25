@@ -28,7 +28,6 @@ const App = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log(storedToken);
         if (storedToken) {
           const res = await verifyToken(storedToken);
           const authHeader = res.headers.authorization;
@@ -44,7 +43,6 @@ const App = () => {
           setAuthState({ authenticated: false, loading: false });
         }
       } catch (error) {
-        console.log(error);
         removeToken();
       }
     };

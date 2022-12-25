@@ -56,9 +56,7 @@ export default function HeaderLinks(props: { secondary: boolean }) {
       removeToken();
       history.push("/auth");
       await logout();
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
   const { moderator } = useSelector((state: RootState) => state.moderator);
 
