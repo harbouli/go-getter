@@ -7,7 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { JWTStrategy } from 'src/utils/strategies/jwt.strategy';
 import { AuthAdminController } from './controllers/auth-admin.controller';
-import { AuthMiddleware } from './middlewares/validate-toke.middleware';
+import { AuthMiddleware } from './middlewares/validate-token.middleware';
+import { UpdateSuperAdminMiddleware } from './middlewares/update-super-admin.middleware';
 
 @Module({
   imports: [
@@ -25,5 +26,6 @@ import { AuthMiddleware } from './middlewares/validate-toke.middleware';
 export class AdminModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(AuthMiddleware).forRoutes(AdminController);
+    consumer.apply(UpdateSuperAdminMiddleware).forRoutes('admin/update/:id');
   }
 }

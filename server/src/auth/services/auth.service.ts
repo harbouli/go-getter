@@ -34,7 +34,7 @@ export class AuthService implements IAuthService {
     );
     if (!user)
       throw new HttpException(
-        'Password Or Email Is incorrect',
+        'Password or email is incorrect',
         HttpStatus.UNAUTHORIZED,
       );
     const isPasswordValid = await compareHash(

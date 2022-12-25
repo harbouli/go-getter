@@ -13,6 +13,8 @@ import {
   Query,
   UseFilters,
   ParseIntPipe,
+  UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateAdminDto } from '../dto/create-admin.dto';
 import { IAdminService } from '../admin.interface';
@@ -50,6 +52,19 @@ export class AdminController {
     }
   }
 
+  // LogOut
+  @Get('logout')
+  async lougout(@GetCurrentUserId() userId: number) {
+    console.log(userId);
+    try {
+      const res = await this.adminService.logout(userId);
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError') {
+        throw new BadRequestException('jwt must be provided');
+      }
+    }
+  }
+
   // Get All Admins
 
   @UseFilters(new PaginationExceptionFilter())
@@ -62,9 +77,31 @@ export class AdminController {
   ) {
     const paginationQuery = { page, perPage };
     const filterQuery = { role };
-    console.log(page);
+
     try {
       return this.adminService.findAllAdmins(paginationQuery, filterQuery);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('current-user')
+  async currentUser(@GetCurrentUserId() userId: number) {
+    try {
+      return this.adminService.findUser({ id: userId });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  @Roles(ROLES.SuperAdmin, ROLES.Admin)
+  @Get('user/:id')
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.adminService.findUser({ id });
+
+    if (user.id !== id && user.adminType === ROLES.Auther)
+      throw new UnauthorizedException('Unauthorize');
+    try {
+      return user;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -80,16 +117,22 @@ export class AdminController {
       throw new HttpException('You Can Update Other User', HttpStatus.CONFLICT);
     return this.adminService.updateAdmin(+id, updateAdminDto);
   }
+
   @Roles(ROLES.SuperAdmin)
   @Patch('update/:id')
-  updateAdminRole(
+  async updateAdminRole(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAdminDto: UpdateAdminDto,
   ) {
+    console.log(id);
     try {
-      return this.adminService.updateAdmin(+id, updateAdminDto);
+      return await this.adminService.updateAdmin(+id, updateAdminDto);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      if (error.name == 'UpdateValuesMissingError')
+        throw new HttpException(
+          'You Should To Put Values',
+          HttpStatus.BAD_REQUEST,
+        );
     }
   }
 

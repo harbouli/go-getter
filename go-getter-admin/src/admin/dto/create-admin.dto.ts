@@ -6,6 +6,8 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  IsPhoneNumber,
+  IsOptional,
 } from 'class-validator';
 import { ROLES } from 'src/utils/constant';
 
@@ -29,4 +31,7 @@ export class CreateAdminDto {
     message: 'Password too weak',
   })
   password: string;
+  @IsOptional()
+  @IsPhoneNumber()
+  phoneNumber: string;
 }

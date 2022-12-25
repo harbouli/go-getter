@@ -8,6 +8,7 @@ import {
   PageQuery,
   PageResponse,
   Tokens,
+  VerifyTokenResponse,
 } from './types';
 
 export interface IAdminService {
@@ -25,4 +26,6 @@ export interface IAdminService {
   updateAdmin(id: number, update: Partial<Admin>);
   isValidToken(token: JwtPayload): Promise<boolean>;
   deleteAdmin(id: number): Promise<any>;
+  verifyToken(jwt: { token: string }): Promise<VerifyTokenResponse>;
+  logout(id: number): Promise<any>;
 }

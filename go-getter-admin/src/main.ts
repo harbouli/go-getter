@@ -16,6 +16,7 @@ async function bootstrap() {
       port: 3001,
     },
   });
+  app.enableCors({ origin: ['http://localhost:3000'], credentials: true });
   app.startAllMicroservices();
   await app.listen(PORT, () => Logger.log('App running in port ' + PORT));
 }

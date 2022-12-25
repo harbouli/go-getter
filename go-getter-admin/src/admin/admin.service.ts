@@ -13,6 +13,7 @@ import {
   PageQuery,
   PageResponse,
   Tokens,
+  VerifyTokenResponse,
 } from './types';
 import * as argon from 'argon2';
 import { compareHash, hashPassword } from 'src/utils/helper';
@@ -33,8 +34,10 @@ export class AdminService implements IAdminService {
     if (existingUser)
       throw new HttpException('User Is Already Exists', HttpStatus.CONFLICT);
     const hashedPassword = await hashPassword(createAdminParam.password);
+    const lowerCase = createAdminParam.email.toLocaleLowerCase();
     const newAdmin = this.adminRepository.create({
       ...createAdminParam,
+      email: lowerCase,
       password: hashedPassword,
     });
     Logger.log('Creating Admin ...');
@@ -54,17 +57,18 @@ export class AdminService implements IAdminService {
     );
     if (!user)
       throw new HttpException(
-        'Password Or Email Is incorrect',
-        HttpStatus.UNAUTHORIZED,
+        'Password or email is incorrect',
+        HttpStatus.BAD_REQUEST,
       );
+
     const isPasswordValid = await compareHash(
       adminLoginParam.password,
       user.password,
     );
     if (!isPasswordValid)
       throw new HttpException(
-        'Password Or Email Is incorrect',
-        HttpStatus.UNAUTHORIZED,
+        'Password or email is incorrect',
+        HttpStatus.BAD_REQUEST,
       );
     const token = await this.getTokens({
       sub: user.id,
@@ -165,30 +169,18 @@ export class AdminService implements IAdminService {
   }
 
   async updateAdmin(id: number, update: Partial<Admin>) {
-    const isSuperUser = await this.findUser({ id });
-    if (!isSuperUser)
-      throw new HttpException(' User Not Found', HttpStatus.NOT_FOUND);
-
-    switch (true) {
-      case Object.keys(update).length === 0:
-        throw new HttpException(
-          'Update payload is empty',
-          HttpStatus.BAD_REQUEST,
-        );
-      case update.password === null:
-        throw new HttpException(
-          'Cannot Updating  Password',
-          HttpStatus.BAD_REQUEST,
-        );
-      case update.adminType === ROLES.Admin &&
-        isSuperUser.adminType !== ROLES.Admin:
-        throw new HttpException(
-          'You Can Update Your Role',
-          HttpStatus.BAD_REQUEST,
-        );
+    let password: string;
+    if (update.password) {
+      password = await hashPassword(update.password);
     }
-
-    await this.adminRepository.update(id, { ...update });
+    await this.adminRepository.update(id, {
+      adminType: update.adminType,
+      email: update.email,
+      firstName: update.firstName,
+      lastName: update.lastName,
+      phoneNumber: update.phoneNumber,
+      ...(password && { password }),
+    });
     const updateAdmin = await this.adminRepository.findOne({ where: { id } });
     const payload: JwtPayload = {
       sub: updateAdmin.id,
@@ -209,5 +201,29 @@ export class AdminService implements IAdminService {
   async updateTokenHash(id: number, at: string): Promise<void> {
     const hashToken = await argon.hash(at);
     await this.adminRepository.update(id, { token: hashToken });
+  }
+
+  async verifyToken(jwt: { token: string }): Promise<VerifyTokenResponse> {
+    const token = await this.jwtService.verify(jwt.token, {
+      secret: process.env.JWT_SECRET,
+    });
+    return { token, valid: true };
+  }
+  // Log Out
+  async logout(id: number): Promise<any> {
+    const user = await this.findUser({ id });
+    if (!user || !user.token)
+      throw new HttpException(
+        'This User does not exist or logout',
+        HttpStatus.BAD_REQUEST,
+      );
+
+    await this.adminRepository
+      .createQueryBuilder()
+      .update()
+      .set({ token: null })
+      .where('id = :id', { id })
+      .andWhere('token IS NOT NULL')
+      .execute();
   }
 }

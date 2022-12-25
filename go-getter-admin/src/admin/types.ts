@@ -22,3 +22,4 @@ export type PageQuery = { page: number; perPage: number };
 export type PageResponse = { admins: Admin[]; total: number; pages: number };
 export type FilterQuery = { role: ROLES[] };
 export type AdminLoginParam = { email: string; password: string };
+export type VerifyTokenResponse = { token: JwtPayload; valid: boolean };
