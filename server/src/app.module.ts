@@ -16,7 +16,7 @@ import { MICROSERVICES } from '../../shared/microservices';
     ConfigModule.forRoot({ envFilePath: '.env.development' }),
     ClientsModule.register([
       {
-        name: MICROSERVICES.ADMIN_SERVICE,
+        name: MICROSERVICES.DASHBOARD_SERVEVER,
         transport: Transport.TCP,
         options: { port: 3030 },
       },
