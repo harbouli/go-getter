@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Twilio } from 'twilio';
-import { IPhoneAuthService } from '../../../../libs/shared/src/interfaces/phone-auth.interface';
+import { IPhoneAuthService } from '@app/shared';
 import Redis from 'ioredis';
-import { IORedisKey } from 'src/redis/redis.module';
+import { IORedisKey } from '@app/shared';
 import { PhoneAuthParam, Tokens } from '../types';
 import { Services } from '@app/shared/utils/constant';
 import { IUserService } from '@app/shared/interfaces/user.interface';

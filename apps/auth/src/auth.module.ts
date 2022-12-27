@@ -6,10 +6,12 @@ import { Services } from '@app/shared';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AtStrategy } from './strategies/at.strategy';
-// import { UsersModule } from 'src/users/users.module';
+// import { UsersModule } from '@app/shared';
+import { redisModule } from '@app/shared';
 import { RtStrategy } from './strategies/rt.strategy';
 import { GoogleStrategy } from './strategies/google-strategy';
 import { googleAuthService } from './services/google-auth.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -18,6 +20,11 @@ import { googleAuthService } from './services/google-auth.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '30d' },
     }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: './.env',
+    }),
+    redisModule,
     // UsersModule,
   ],
   controllers: [AuthController],

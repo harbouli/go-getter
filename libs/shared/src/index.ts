@@ -1,6 +1,10 @@
-export * from './shared.module';
+// ** Modules **//
+export * from './modules/redisConfig.module';
+export * from './modules/redis.module';
+export * from './modules/mysql.module';
 export * from './shared.service';
 
+// ** Interfaces **//
 // ** Interfaces **//
 export * from './interfaces/auth.interface';
 export * from './interfaces/user.interface';

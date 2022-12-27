@@ -11,25 +11,21 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { CreateAuthDto } from '../dto/create-auth.dto';
+import { CreateAuthDto } from '../../../api/src/auth-controller/dto/create-auth.dto';
 import { User } from '@app/shared';
 import { Routes, Services } from '@app/shared';
 
 import { IAuthService } from '@app/shared';
 import { CredentialsParams, Tokens } from '../types';
-import { AuthDto } from '../dto/auth.dto';
+import { AuthDto } from '../../../api/src/auth-controller/dto/auth.dto';
 
-import {
-  GetCurrentUser,
-  GetCurrentUserId,
-  Public,
-} from '@app/shared/utils/decorators';
+import { GetCurrentUser, GetCurrentUserId, Public } from '@app/shared';
 import { RtGuard } from '@app/shared/utils/guards/rt.guard';
 import { IPhoneAuthService } from '@app/shared';
 import { otp } from '@app/shared';
-import { SendPhoneNumberDto } from '../dto/send-phone-number.dto';
-import { VerifyOtpDto } from '../dto/verify-otp.dto';
-import { PhoneAuthDto } from '../dto/phone-auth.dto';
+import { SendPhoneNumberDto } from '../../../api/src/auth-controller/dto/send-phone-number.dto';
+import { VerifyOtpDto } from '../../../api/src/auth-controller/dto/verify-otp.dto';
+import { PhoneAuthDto } from '../../../api/src/auth-controller/dto/phone-auth.dto';
 import { GoogleAuthGuard } from '@app/shared/utils/guards/google.guard';
 import { IGoogleAuthService } from '@app/shared';
 
