@@ -1,11 +1,34 @@
 version: '3.8'
 
 services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    volumes:
+      - /var/lib/rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    env_file:
+      - .env
+  db:
+    image: mysql:8.0
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+  
+
   redis:
     image: 'redislabs/rejson:2.0.0'
+    env_file:
+      - .env
     ports:
       - '6379:6379'
     volumes:
       - 'redisdata:/data'
 volumes:
   redisdata:
+
+
